@@ -1,0 +1,27 @@
+name: Build selected ANTA product pack
+on:
+  workflow_dispatch:
+    inputs:
+      skus:
+        description: "Comma-separated ANTA SKUs"
+        required: true
+        type: string
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Create SKU list
+        env:
+          SKUS: ${{ inputs.skus }}
+        run: python -c "import os; open('selected_skus.txt','w').write('\\n'.join(x.strip() for x in os.environ['SKUS'].split(',')))"
+      - run: python build_selected_pack.py --selected-file selected_skus.txt --output ANTA_SELECTED_PRODUCTS.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ANTA-selected-products
+          path: ANTA_SELECTED_PRODUCTS.zip

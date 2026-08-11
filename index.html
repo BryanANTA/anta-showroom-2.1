@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ANTA Showroom V2</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f4f4;color:#111}
+header{background:#111;color:#fff;padding:26px 5%;position:sticky;top:0;z-index:10}
+h1{margin:0 0 6px}.sub{opacity:.75;margin-bottom:16px}
+.controls{display:flex;gap:10px;flex-wrap:wrap}.controls input,.controls select{padding:13px;border:0;border-radius:7px;font-size:15px}
+.controls input{flex:1;min-width:280px}.controls select{min-width:160px}
+main{max-width:1500px;margin:auto;padding:25px 5%}.meta{color:#555;margin-bottom:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
+.card{background:white;border-radius:12px;padding:17px;box-shadow:0 2px 10px #0001;min-height:245px}
+.thumb{height:145px;background:#eee;border-radius:8px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;color:#888}
+.thumb img{max-height:145px;max-width:100%;border-radius:8px}.sku{font-size:12px;color:#666;font-weight:bold}
+.name{font-size:19px;font-weight:bold;margin:7px 0}.tag{display:inline-block;background:#eee;border-radius:5px;padding:4px 7px;font-size:11px}
+.desc{font-size:13px;line-height:1.45;color:#444}.btn{border:0;background:#111;color:#fff;padding:9px 12px;border-radius:6px;cursor:pointer}
+#detail{display:none;position:fixed;inset:0;background:#fff;z-index:20;overflow:auto;padding:30px 5%}.close{float:right}
+.detail{max-width:1200px;margin:auto}.cols{display:grid;grid-template-columns:1fr 1fr;gap:35px}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.gallery img{width:100%;aspect-ratio:1;object-fit:contain;background:#f4f4f4;border-radius:7px}
+pre{white-space:pre-wrap;font-family:inherit;line-height:1.5}.status{font-size:12px;padding:5px 8px;border-radius:5px;background:#eee}
+@media(max-width:750px){.cols{grid-template-columns:1fr}}
+</style></head>
+<body>
+<header><h1>ANTA SHOWROOM</h1><div class="sub">SKU • Product • Regional SKU • E-commerce • Enrichment</div>
+<div class="controls"><input id="q" placeholder="Search SKU, 1/8 SKU, name, colour, category…">
+<select id="status"><option value="">All statuses</option><option>E_COM_MATCH</option><option>REGIONAL_MATCH</option><option>PENDING_REVIEW</option></select>
+<button class="btn" onclick="selectAllVisible()">Select visible</button>
+<button class="btn" onclick="clearSelection()">Clear selection</button>
+<button class="btn" onclick="openDownloadMenu()">Download selected</button><button class="btn" onclick="downloadSelectedCSV()">Export CSV</button>
+</div></header>
+<main><div class="meta" id="meta"></div><div id="selectionBar" class="meta">0 products selected</div><div class="grid" id="grid"></div></main>
+<section id="downloadMenu" style="display:none;position:fixed;inset:0;background:#0008;z-index:30;align-items:center;justify-content:center">
+<div style="background:white;border-radius:12px;padding:28px;max-width:520px;width:92%">
+<button class="btn close" onclick="closeDownloadMenu()">Close</button>
+<h2>Download selected products</h2>
+<p id="downloadCount"></p>
+<button class="btn" style="width:100%;margin:6px 0" onclick="downloadMode('info')">Product Information Only</button>
+<button class="btn" style="width:100%;margin:6px 0" onclick="downloadMode('images')">Image List / Sources Only</button>
+<button class="btn" style="width:100%;margin:6px 0" onclick="downloadMode('complete')">Complete Product Pack</button>
+<p style="font-size:12px;color:#666">Complete packs are assembled by the server/GitHub Action so permitted image files can be bundled with the product information.</p>
+</div></section>
+<section id="detail"><button class="btn close" onclick="detail.style.display='none'">Close</button><div id="detailBody" class="detail"></div></section>
+<script>
+let P=[];
+fetch('products.json').then(r=>r.json()).then(d=>{P=d;render();});
+function hay(p){return [p.sku,p.alternate_sku,p.product_name,p.colour,p.category,p.product_type,p.product_sub_type,p.material,p.search_terms].join(' ').toLowerCase()}
+function render(){
+ let q=document.getElementById('q').value.toLowerCase(), s=document.getElementById('status').value;
+ let a=P.filter(p=>(!q||hay(p).includes(q))&&(!s||p.review_status===s));
+ document.getElementById('meta').textContent=`${a.length.toLocaleString()} products shown • ${P.length.toLocaleString()} total`;
+ document.getElementById('grid').innerHTML=a.slice(0,500).map(p=>{
+ let i=P.indexOf(p), im=p.image_1_url;
+ return `<article class="card"><div class="thumb">${im?`<img src="${im}" loading="lazy">`:'IMAGE SEARCH PENDING'}</div>
+ <label><input type="checkbox" class="pick" data-index="${i}" onchange="updateSelection()"> Select</label>
+ <div class="sku">${p.sku}${p.alternate_sku?' · '+p.alternate_sku:''}</div>
+ <div class="name">${p.product_name||'ANTA Product'}</div>
+ <span class="tag">${p.review_status}</span>
+ <p class="desc">${p.ecom_description||p.short_description||p.long_description||'Description pending enrichment.'}</p>
+ <button class="btn" onclick="show(${i})">View product</button></article>`}).join('');
+}
+q.oninput=render;status.onchange=render;
+const selected=new Set();
+function openDownloadMenu(){
+ if(!selected.size){alert('Select at least one product first.');return;}
+ document.getElementById('downloadCount').textContent=`${selected.size} product(s) selected.`;
+ document.getElementById('downloadMenu').style.display='flex';
+}
+function closeDownloadMenu(){document.getElementById('downloadMenu').style.display='none';}
+function downloadMode(mode){
+ const rows=[...selected].map(i=>P[i]);
+ if(mode==='complete'){ 
+   const skus=rows.map(p=>p.sku).join(',');
+   const blob=new Blob([skus],{type:'text/plain'});
+   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+   a.download=`ANTA_Selected_SKUs_${rows.length}.txt`;a.click();URL.revokeObjectURL(a.href);
+   alert('SKU list downloaded. The Complete Product Pack workflow can use this list to build the ZIP with permitted images.');
+   closeDownloadMenu(); return;
+ }
+ if(mode==='images'){ 
+   const lines=[];
+   rows.forEach(p=>{
+     lines.push(`SKU: ${p.sku}`);
+     for(let i=1;i<=6;i++) if(p[`image_${i}_url`]) lines.push(`Image ${i}: ${p[`image_${i}_url`]}`);
+     if(p.web_match_url) lines.push(`Source: ${p.web_match_url}`);
+     lines.push('');
+   });
+   const blob=new Blob([lines.join('\\n')],{type:'text/plain'});
+   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+   a.download=`ANTA_Image_Sources_${rows.length}.txt`;a.click();URL.revokeObjectURL(a.href);
+   closeDownloadMenu(); return;
+ }
+ downloadSelected(); closeDownloadMenu();
+}
+
+function updateSelection(){
+ document.querySelectorAll('.pick').forEach(x=>{
+   const i=Number(x.dataset.index);
+   if(x.checked) selected.add(i); else selected.delete(i);
+ });
+ document.getElementById('selectionBar').textContent=`${selected.size} products selected`;
+}
+function selectAllVisible(){
+ document.querySelectorAll('.pick').forEach(x=>{x.checked=true; selected.add(Number(x.dataset.index));});
+ updateSelection();
+}
+function clearSelection(){
+ selected.clear();
+ document.querySelectorAll('.pick').forEach(x=>x.checked=false);
+ updateSelection();
+}
+async function downloadSelected(){
+ if(!selected.size){alert('Select at least one product first.');return;}
+ const rows=[...selected].map(i=>P[i]);
+ const payload={
+   generated:new Date().toISOString(),
+   count:rows.length,
+   products:rows.map(p=>({
+     sku:p.sku, alternate_sku:p.alternate_sku, product_name:p.product_name,
+     colour:p.colour, category:p.category, product_type:p.product_type,
+     material:p.material, rrp:p.rrp,
+     description:p.ecom_description||p.short_description||p.long_description||'',
+     features:p.features||p.ecom_features||'',
+     images:[p.image_1_url,p.image_2_url,p.image_3_url,p.image_4_url,p.image_5_url,p.image_6_url].filter(Boolean),
+     web_source:p.web_match_url||''
+   }))
+ };
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+ const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+ a.download=`ANTA_Selected_Products_${rows.length}.json`; a.click();
+ URL.revokeObjectURL(a.href);
+}
+
+function show(i){
+ let p=P[i]; let imgs=['image_1_url','image_2_url','image_3_url','image_4_url','image_5_url','image_6_url'].filter(k=>p[k]).map(k=>`<img src="${p[k]}">`).join('');
+ detailBody.innerHTML=`<div class="cols"><div><div class="gallery">${imgs||'<div class="thumb">Product images pending</div>'}</div></div>
+ <div><h1>${p.product_name||'ANTA Product'}</h1><p><b>SKU:</b> ${p.sku}</p><p><b>Regional SKU:</b> ${p.alternate_sku||'—'}</p>
+ <p><b>Colour:</b> ${p.colour||'—'}</p><p><b>Category:</b> ${p.product_type||p.category||'—'}</p>
+ <p><b>Material:</b> ${p.material||'—'}</p><p><b>RRP:</b> ${p.rrp||'—'}</p>
+ <p><span class="status">${p.review_status}</span></p><h3>E-commerce description</h3><pre>${p.ecom_description||p.short_description||'Pending enrichment.'}</pre>
+ <h3>Features</h3><pre>${p.features||p.ecom_features||'Pending enrichment.'}</pre></div></div>`;
+ detail.style.display='block';
+}
+// Optional browser export helper
+function downloadSelectedCSV(){
+ const rows=[...selected].map(i=>P[i]);
+ if(!rows.length){alert("Select at least one product first.");return;}
+ const cols=["sku","alternate_sku","product_name","colour","category","product_type","material","rrp"];
+ const esc=v=>`"${String(v??"").replaceAll('"','""')}"`;
+ const csv=[cols.join(","),...rows.map(r=>cols.map(c=>esc(r[c])).join(","))].join("\n");
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+ a.download=`ANTA_Selected_Products_${rows.length}.csv`;a.click();
+}
+</script>
+</body></html>
