@@ -1,0 +1,36 @@
+name: ANTA V11 Auto Image Updater
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Products to process"
+        required: true
+        default: "10"
+        type: string
+  schedule:
+    - cron: "23 1 * * 1,3,5"
+
+permissions:
+  contents: write
+
+jobs:
+  update-images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Run updater
+        env:
+          LIMIT: ${{ github.event.inputs.limit || '10' }}
+        run: python v11_image_updater.py --limit "$LIMIT"
+      - name: Commit updates
+        run: |
+          git config user.name "anta-image-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add products.json review_queue_v11.csv
+          git commit -m "V11 update product images" || exit 0
+          git push

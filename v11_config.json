@@ -1,0 +1,9 @@
+{
+  "max_products_per_run": 10,
+  "auto_publish_threshold": 85,
+  "review_threshold": 60,
+  "delay_seconds": 2.0,
+  "max_search_results": 8,
+  "max_images_per_product": 6,
+  "user_agent": "ANTA-Showroom-Image-Enrichment/1.1"
+}
