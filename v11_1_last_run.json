@@ -1,0 +1,47 @@
+[
+  {
+    "sku": "312039901-1",
+    "status": "NOT_FOUND",
+    "score": 8,
+    "source": "https://anta.com/collections/shoes",
+    "title": "ANTA Shoes Collection | ANTA Official Website | ANTA US",
+    "image": "https://anta.com/cdn/shop/files/ANTA-KAI-1-TEAM-BHM-Media-1.jpg?v=1739691643",
+    "candidates": 65
+  },
+  {
+    "sku": "312039902-1",
+    "status": "NOT_FOUND",
+    "score": 26,
+    "source": "https://antasport.tn/collections/sports",
+    "title": "Sports – ANTA-TUNISIE",
+    "image": "https://antasport.tn/cdn/shop/files/sneaker-grise-noire-homme-anta-softwalk-confort-respirante.jpg?v=1751289702",
+    "candidates": 80
+  },
+  {
+    "sku": "312039902-2",
+    "status": "NOT_FOUND",
+    "score": 26,
+    "source": "https://antasport.tn/collections/sports",
+    "title": "Sports – ANTA-TUNISIE",
+    "image": "https://antasport.tn/cdn/shop/files/01_fe094725-f03d-48f5-8dc7-bfe0733fbcc3.png?v=1767005187",
+    "candidates": 83
+  },
+  {
+    "sku": "312121102-4",
+    "status": "NOT_FOUND",
+    "score": 22,
+    "source": "https://shopee.co.th/Anta-Girls-Big-Kids-7-14-ปีรองเท้าวิ่งกีฬารองเท้ารองเท้าผ้าใบกันลื่นทนต่อการสึกหรอ-A322425599-i.969669597.26864176208",
+    "title": "Anta Girls Big Kids 7-14 ปีรองเท้าวิ่งกีฬารองเท้ารองเท้าผ้าใบกันลื่นทน ...",
+    "image": "https://down-th.img.susercontent.com/file/cn-11134207-7ras8-m1fe02yhg0qr46",
+    "candidates": 83
+  },
+  {
+    "sku": "312121110-1",
+    "status": "NOT_FOUND",
+    "score": 34,
+    "source": "https://shopee.co.th/Anta-SS-Boys-Sports-Big-Kids-7-14-ปีรองเท้าบาสเก็ตบอล-Combat-Cushioning-รองเท้าผ้าใบ-312121110ยู-ยู-i.969669597.29125381275",
+    "title": "Anta SS Boys Sports Big Kids 7-14 ปีรองเท้าบาสเก็ตบอล Combat Cushioning ...",
+    "image": "https://down-th.img.susercontent.com/file/cn-11134208-7ras8-m5xvvnevptep0e",
+    "candidates": 85
+  }
+]
