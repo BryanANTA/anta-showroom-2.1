@@ -1,0 +1,10 @@
+{
+  "max_products_per_run": 10,
+  "auto_publish_threshold": 82,
+  "review_threshold": 55,
+  "max_image_results": 20,
+  "max_images_per_product": 6,
+  "image_min_width": 500,
+  "image_min_height": 500,
+  "request_timeout": 20
+}

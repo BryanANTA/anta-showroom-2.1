@@ -1,0 +1,47 @@
+name: ANTA V11.1 Better Image Updater
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Products to process"
+        required: true
+        default: "5"
+        type: string
+      skus:
+        description: "Optional comma-separated SKUs"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  update-images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Run V11.1 updater
+        env:
+          LIMIT: ${{ github.event.inputs.limit }}
+          SKUS: ${{ github.event.inputs.skus }}
+        run: |
+          ARGS=""
+          if [ -n "$SKUS" ]; then
+            IFS=',' read -ra ITEMS <<< "$SKUS"
+            for s in "${ITEMS[@]}"; do ARGS="$ARGS --sku $(echo "$s" | xargs)"; done
+          fi
+          python v11_1_image_updater.py --limit "$LIMIT" $ARGS
+      - name: Commit results
+        run: |
+          git config user.name "anta-image-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add products.json v11_1_last_run.json
+          if [ -f review_queue_v11_1.csv ]; then git add review_queue_v11_1.csv; fi
+          git commit -m "V11.1 improve product images" || exit 0
+          git push
