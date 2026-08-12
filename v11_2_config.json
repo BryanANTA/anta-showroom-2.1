@@ -1,0 +1,31 @@
+{
+  "max_products_per_run": 5,
+  "auto_publish_threshold": 90,
+  "review_threshold": 70,
+  "max_web_results": 12,
+  "max_images_per_product": 6,
+  "image_min_width": 500,
+  "image_min_height": 500,
+  "request_timeout": 20,
+  "reject_path_terms": [
+    "/collections/",
+    "/collection/",
+    "/category/",
+    "/categories/",
+    "/search",
+    "/sports"
+  ],
+  "preferred_domains": [
+    "anta.com",
+    "anta.com.cn",
+    "anta-sports.com",
+    "amazon.",
+    "noon.",
+    "novelship.",
+    "shopee.",
+    "lazada.",
+    "jd.com",
+    "tmall.",
+    "taobao."
+  ]
+}
