@@ -1,0 +1,20 @@
+{
+  "max_products_per_run": 5,
+  "auto_publish_image_threshold": 90,
+  "auto_publish_description_threshold": 88,
+  "review_threshold": 70,
+  "max_web_results": 12,
+  "max_images_per_product": 6,
+  "image_min_width": 500,
+  "image_min_height": 500,
+  "request_timeout": 20,
+  "description_min_chars": 120,
+  "description_max_chars": 1200,
+  "reject_path_terms": [
+    "/collections/",
+    "/collection/",
+    "/category/",
+    "/categories/",
+    "/search"
+  ]
+}

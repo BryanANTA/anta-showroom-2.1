@@ -1,4 +1,4 @@
-name: ANTA V11.2 Confirmed Product Page Updater
+name: ANTA V12 Images + Descriptions Enricher
 
 on:
   workflow_dispatch:
@@ -18,7 +18,7 @@ permissions:
   contents: write
 
 jobs:
-  update-images:
+  enrich-products:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,7 +26,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
-      - name: Run V11.2 updater
+      - name: Run V12 enrichment
         env:
           LIMIT: ${{ github.event.inputs.limit }}
           SKUS: ${{ github.event.inputs.skus }}
@@ -36,12 +36,11 @@ jobs:
             IFS=',' read -ra ITEMS <<< "$SKUS"
             for s in "${ITEMS[@]}"; do ARGS="$ARGS --sku $(echo "$s" | xargs)"; done
           fi
-          python v11_2_image_updater.py --limit "$LIMIT" $ARGS
-      - name: Commit results
+          python v12_enrichment_updater.py --limit "$LIMIT" $ARGS
+      - name: Commit enrichment results
         run: |
-          git config user.name "anta-image-bot"
+          git config user.name "anta-enrichment-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add products.json v11_2_last_run.json
-          if [ -f review_queue_v11_2.csv ]; then git add review_queue_v11_2.csv; fi
-          git commit -m "V11.2 confirmed product page images" || exit 0
+          git add products.json v12_last_run.json
+          git commit -m "V12 enrich images and descriptions" || exit 0
           git push
