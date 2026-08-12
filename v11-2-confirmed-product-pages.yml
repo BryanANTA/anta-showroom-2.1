@@ -45,3 +45,4 @@ jobs:
           if [ -f review_queue_v11_2.csv ]; then git add review_queue_v11_2.csv; fi
           git commit -m "V11.2 confirmed product page images" || exit 0
           git push
+          
